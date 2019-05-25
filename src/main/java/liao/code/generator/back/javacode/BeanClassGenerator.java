@@ -4,6 +4,7 @@ import liao.code.generator.back.factory.Factory;
 import liao.parse.table.model.Column;
 import liao.parse.table.model.Table;
 import liao.utils.NameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -21,11 +22,16 @@ public class BeanClassGenerator extends AbstractClassGenerator {
         return content.toString();
     }
     private StringBuilder createAttr(Table table){
-        List<Column> colList = table.getColumnList();
         StringBuilder content = new StringBuilder();
-        for(Column col : colList){
-            content.append("    private "+ col.getColJavaType() + " " + col.getCamelColName() + ";//"+col.getComment()+System.lineSeparator());
+        table.getColumnList().stream().forEach(column ->  {
+        String comment = column.getComment();
+        if(StringUtils.isNotBlank(comment)){
+            comment = comment.replaceAll("\n"," ");
+        }else{
+            comment = "";
         }
+        content.append("    private ").append(column.getColJavaType()).append(" ").append(column.getCamelColName()).append(";//").append(comment).append(System.lineSeparator());
+        });
         return content;
     }
     private StringBuilder getMethodDefine(List<Column> colList){

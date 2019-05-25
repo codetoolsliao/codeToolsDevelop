@@ -56,6 +56,31 @@ public class CommonUtils {
         return sqlType;
     }
 
+    public static String sqlTypeToJavaTypeForOracle(String sqlType,String dataScale){
+        sqlType = sqlType.replaceAll("\\(.+\\)","").toUpperCase();//去掉括号
+        if(sqlType.equals("BIGINT")){
+            return "Long";
+        }else if(sqlType.equals("NUMBER")){
+            if(dataScale != null ){
+                int scale = Integer.parseInt(dataScale);
+                if(scale > 0){
+                    return "Double";
+                }
+
+            }
+                return "Integer";
+        }else if (sqlType.equals("VARCHAR2") || sqlType.equals("VARCHAR")){
+            return "String";
+        }else if(sqlType.equals("DATE") || sqlType.equals("TIMESTAMP")){
+            return "Date";
+        }else if(sqlType.equals("CLOB")){
+            return "Clob";
+        }else if(sqlType.equals("DECIMAL")){
+            return "BigDecimal";
+        }
+        return sqlType;
+    }
+
     public static<K,V  extends IListToMap<K>> Map<K,V> convertListToMap(List<V> valueList, K k){
         if(valueList == null){
             return null;
