@@ -17,7 +17,7 @@ import java.util.Scanner;
  */
 public class Start {
     public static void  main(String[] args){
-        System.out.println("输入表名称：");
+        System.out.println("请输入表名称：");
         Scanner sc = new Scanner(System.in);
         String tableName = sc.nextLine().trim();
        // Table table = new ParseTableForMySQL(tableName).getTable();

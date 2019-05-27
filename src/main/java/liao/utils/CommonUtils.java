@@ -68,8 +68,8 @@ public class CommonUtils {
                 }
 
             }
-                return "Integer";
-        }else if (sqlType.equals("VARCHAR2") || sqlType.equals("VARCHAR")){
+                return "Long";
+        }else if ("VARCHAR2".equals(sqlType) || "VARCHAR".equals(sqlType) || "NVARCHAR2".equals(sqlType) || "CHAR".equals(sqlType)){
             return "String";
         }else if(sqlType.equals("DATE") || sqlType.equals("TIMESTAMP")){
             return "Date";

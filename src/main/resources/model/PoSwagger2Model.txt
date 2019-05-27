@@ -1,0 +1,17 @@
+package #basePackage#.model;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+/**
+ * #tableComment#
+ */
+@Data
+@ApiModel("#tableComment#实体")
+public class #className#VO extends QueryCond implements Serializable {
+#content#
+}

@@ -8,6 +8,7 @@ import liao.code.generator.back.sql.SqlGenerator;
  */
 public enum GeneratorTypeEnum {
     PO(1,new BeanClassGenerator.BeanFactory()),
+    PO2(1,new BeanClassGenerator4Swagger2.BeanFactory()),
     VO(2,new VoModelClassGenerator.VoFactory()),
     DAO(3,new DaoClassGenerator.DaoFactory()),
     DAO_IMPL(4,new DaoImplClassGenerator.DaoImplFactory()),
