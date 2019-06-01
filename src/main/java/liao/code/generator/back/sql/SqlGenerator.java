@@ -17,13 +17,14 @@ import java.io.File;
 @Component
 public class SqlGenerator extends AbstractCodeGenerator {
     private static final String CONFIG_FILE = "sqlModel";
-
+    @Override
     public String replaceModelCode(Table table, String model) {
         String selectSql = createSelectSql(table);
         String insertSql = createInsertSql(table);
         String updateSql = createUpdateSql(table);
         model = model.replace("#tableName#", table.getTableName());
         model = model.replace("#selectSQL#", selectSql);
+        model = model.replace("#selectDetailSQL#", this.createSelectDetailSQL(table));
         model = model.replace("#insertSQL#", insertSql);
         return model.replace("#updateSQL#", updateSql);
     }
@@ -38,7 +39,28 @@ public class SqlGenerator extends AbstractCodeGenerator {
         sql.append("        FROM " + table.getTableName() + " t" + System.lineSeparator());
         return sql.toString();
     }
-
+    public String createSelectDetailSQL(Table table) {
+        StringBuilder sql = new StringBuilder("SELECT" + System.lineSeparator());
+        Column column = null;
+        if(table != null && !table.getColumnList().isEmpty()){
+            for(int i = 0;i < table.getColumnList().size();i++){
+                Column col = table.getColumnList().get(i);
+                if(i == 0){
+                    column = col;
+                }
+                sql.append("            t." + col.getColName() + " AS " + col.getCamelColName() + "," + System.lineSeparator());
+            }
+        }
+        sql = removeLastChar(sql, ",");
+        sql.append(System.lineSeparator());
+        sql.append("        FROM " + table.getTableName() + " t" + System.lineSeparator());
+        if(column != null){
+            sql.append("        WHERE " + column.getColName() + "=#{" + column.getCamelColName() + "," + getJdbcType(column.getColDBType()) + "}," );
+        }else{
+            sql.append("        WHERE id=#{id}");
+        }
+        return sql.toString();
+    }
     public String createInsertSql(Table table) {
         StringBuilder sql = new StringBuilder("INSERT INTO " + table.getTableName() + "(" + System.lineSeparator());
         for (Column col : table.getColumnList()) {
@@ -71,19 +93,31 @@ public class SqlGenerator extends AbstractCodeGenerator {
 
     public String createUpdateSql(Table table) {
         StringBuilder sql = new StringBuilder("UPDATE " + table.getTableName() + " SET" + System.lineSeparator());
-        for (Column col : table.getColumnList()) {
-            sql.append("            " + col.getColName() + "=#{" + col.getCamelColName() + "," + getJdbcType(col.getColDBType()) + "}," + System.lineSeparator());
+        Column column = null;
+        if(table != null && !table.getColumnList().isEmpty()){
+            for(int i = 0;i < table.getColumnList().size();i++){
+                Column col = table.getColumnList().get(i);
+                if(i == 0){
+                    column = col;
+                }else{
+                    sql.append("            " + col.getColName() + "=#{" + col.getCamelColName() + "," + getJdbcType(col.getColDBType()) + "}," + System.lineSeparator());
+                }
+            }
         }
         sql = removeLastChar(sql, ",");
         sql.append(System.lineSeparator());
-        sql.append("        WHERE id=#{id}");
+        if(column != null){
+            sql.append("        WHERE " + column.getColName() + "=#{" + column.getCamelColName() + "," + getJdbcType(column.getColDBType()) + "}," );
+        }else{
+            sql.append("        WHERE id=#{id}");
+        }
         return sql.toString();
     }
 
     public StringBuilder removeLastChar(StringBuilder str, String code) {
         return new StringBuilder(str.substring(0, str.lastIndexOf(code)));
     }
-
+    @Override
     public String getFileName(Table table) {
         return "sql" + File.separator + NameUtils.underline2Camel(table.getTableName().replace(PropertyUtils.getConfig("config").getProperty("tablePre"), "")) + "_sql.xml";
     }

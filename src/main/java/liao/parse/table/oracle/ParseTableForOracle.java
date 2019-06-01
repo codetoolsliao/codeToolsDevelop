@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -21,21 +22,25 @@ public class ParseTableForOracle {
     private String tableColumnSQL = "select s.column_name as column_name, cs.COMMENTS as column_comment, s.nullable as is_nullable, s.data_type as data_type,s.DATA_SCALE as data_scale from user_tab_columns s, user_col_comments cs where cs.COLUMN_NAME = s.COLUMN_NAME and cs.TABLE_NAME = s.TABLE_NAME and s.table_name = '#tableName#'";
     private String tableDefineSQL = "SELECT c.COMMENTS as table_comment FROM user_tab_comments c WHERE c.table_name = '#tableName#'";
     private Connection conn;
-    private Table table;
+    private List<Table> tables;
     public ParseTableForOracle(String tableName){
+        tables = new ArrayList<>();
         if(org.apache.commons.lang3.StringUtils.isNotBlank(tableName)){
-            table = new Table(tableName.toLowerCase());
+            Arrays.stream(tableName.split(",")).forEach(s -> {
+                tables.add(new Table(s.toLowerCase()));
+            });
         }
     }
     public Table getTable(){
-        tableColumnSQL = tableColumnSQL.replace("#tableName#",table.getTableName().toUpperCase());
-        tableDefineSQL = tableDefineSQL.replace("#tableName#",table.getTableName().toUpperCase());
+        Table table = this.getTables().get(0);
+        String columnSQL = this.getTableColumnSQL().replace("#tableName#",table.getTableName().toUpperCase());
+        String defineSQL = this.getTableDefineSQL().replace("#tableName#",table.getTableName().toUpperCase());
         try {
             conn = getConnection();
             Statement stat = getStatement(conn);
-            ResultSet rs = stat.executeQuery(tableColumnSQL);
+            ResultSet rs = stat.executeQuery(columnSQL);
             List<Column> columnList = convertToColumnList(rs,table.getTableName());
-            ResultSet rs1 = stat.executeQuery(tableDefineSQL);
+            ResultSet rs1 = stat.executeQuery(defineSQL);
             table.setComment(getTableComment(rs1));
             table.setColumnList(columnList);
         }catch (Exception e) {
@@ -48,6 +53,37 @@ public class ParseTableForOracle {
             }
         }
         return table;
+    }
+    public List<Table> getTableList(){
+        List<Table> tables = this.getTables();
+        try {
+            conn = getConnection();
+            Statement stat = getStatement(conn);
+            tables.stream().forEach(table1 -> {
+                String columnSQL = this.getTableColumnSQL().replace("#tableName#",table1.getTableName().toUpperCase());
+                String defineSQL = this.getTableDefineSQL().replace("#tableName#",table1.getTableName().toUpperCase());
+                try {
+                    ResultSet rs = stat.executeQuery(columnSQL);
+                    List<Column> columnList = convertToColumnList(rs,table1.getTableName());
+                    ResultSet rs1 = stat.executeQuery(defineSQL);
+                    table1.setComment(getTableComment(rs1));
+                    table1.setColumnList(columnList);
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+
+            });
+
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return tables;
     }
     public String getTableComment(ResultSet rs) throws SQLException {
         while(rs.next()){
@@ -83,5 +119,17 @@ public class ParseTableForOracle {
             columnList.add(col);
         }
         return columnList;
+    }
+
+    public String getTableColumnSQL() {
+        return tableColumnSQL;
+    }
+
+    public String getTableDefineSQL() {
+        return tableDefineSQL;
+    }
+
+    public List<Table> getTables() {
+        return tables;
     }
 }

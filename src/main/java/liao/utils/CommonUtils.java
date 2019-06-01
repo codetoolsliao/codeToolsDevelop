@@ -1,5 +1,7 @@
 package liao.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 /**
@@ -18,7 +20,7 @@ public class CommonUtils {
         return null;
     }
     public static boolean isEmpty(String str){
-        if(str == null || "".equals(str.trim())){
+        if(StringUtils.isBlank(str)){
             return true;
         }
         return false;
@@ -72,7 +74,7 @@ public class CommonUtils {
         }else if ("VARCHAR2".equals(sqlType) || "VARCHAR".equals(sqlType) || "NVARCHAR2".equals(sqlType) || "CHAR".equals(sqlType)){
             return "String";
         }else if(sqlType.equals("DATE") || sqlType.equals("TIMESTAMP")){
-            return "Date";
+            return "String";
         }else if(sqlType.equals("CLOB")){
             return "Clob";
         }else if(sqlType.equals("DECIMAL")){

@@ -16,8 +16,7 @@
          <include refid="queryCondition"/>
     </select>
     <select id="get#className#ById" parameterType="Long" resultType="#basePackage#.vo.#className#Vo">
-        #selectSQL#
-        WHERE id=#{id}
+        #selectDetailSQL#
     </select>
     <insert id="insert#className#" parameterType="#basePackage#.vo.#className#Vo">
         #insertSQL#

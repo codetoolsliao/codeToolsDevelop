@@ -33,7 +33,7 @@ public class BeanClassGenerator4Swagger2 extends AbstractClassGenerator {
         }
         content.append("    @ApiModelProperty(value = \"").append(comment).append("\")");//swagger2标注 默认非必填
         content.append(System.lineSeparator());//空一行
-        content.append("    private ").append(column.getColJavaType()).append(" ").append(column.getCamelColName()).append(System.lineSeparator());
+        content.append("    private ").append(column.getColJavaType()).append(" ").append(column.getCamelColName()).append(";//").append(comment).append(System.lineSeparator());
         content.append(System.lineSeparator());//空一行
         });
         return content;

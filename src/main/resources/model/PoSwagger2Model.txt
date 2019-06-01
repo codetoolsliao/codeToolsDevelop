@@ -12,6 +12,9 @@ import lombok.Data;
  */
 @Data
 @ApiModel("#tableComment#实体")
-public class #className#VO extends QueryCond implements Serializable {
+public class #className#VO implements Serializable {
+
+    private static final long serialVersionUID = -1L;
+
 #content#
 }
